@@ -1,0 +1,50 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
+    links:
+      - postgres
+    depends_on:
+      - redis
+      - worker
+      - postgres
+  worker:
+    build:
+      context: .
+      dockerfile: api/worker/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - postgres
+    links:
+      - redis
+      - postgres
+  redis:
+    image: redis:7.2.0
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./.redis:/redis
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    volumes:
+      - ./.postgres-data:/var/lib/postgresql/data
+      - ./sql/docker_init.sql:/docker-entrypoint-initdb.d/docker_init.sql
