@@ -155,3 +155,4 @@ cython_debug/
 .idea/
 .postgres-data/
 .redis/
+.DS_Store

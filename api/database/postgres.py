@@ -2,6 +2,7 @@ import os
 import psycopg2
 from base import Monostate
 
+
 class Postgres(Monostate):
 
     def __init__(self):
@@ -22,7 +23,6 @@ class Postgres(Monostate):
         cur.execute('select * from test_runs;')
         return cur.fetchall()
 
-
     def insert_new_test_run(self, name, status):
         cur = self._conn.cursor()
         sql = 'insert into test_runs (name, status) values (%s, %s) returning run_id;'
@@ -32,7 +32,6 @@ class Postgres(Monostate):
         cur.close()
         return run_id
 
-
     def update_test_run_status(self, run_id, status):
         cur = self._conn.cursor()
         sql = 'update test_runs set status = %s where run_id = %s;'
@@ -40,7 +39,6 @@ class Postgres(Monostate):
         self._conn.commit()
         cur.close()
         return True
-
 
     def update_test_run_result(self, run_id, result):
         cur = self._conn.cursor()

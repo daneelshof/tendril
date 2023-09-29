@@ -1,0 +1,5 @@
+@import "bulma.min.css";
+
+.hero.is-primary {
+    background: linear-gradient(to top right, #134c91 10%, #22c2d4);
+}

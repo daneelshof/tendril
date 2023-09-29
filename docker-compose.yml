@@ -12,7 +12,6 @@ services:
       - postgres
     depends_on:
       - redis
-      - worker
       - postgres
   worker:
     build:
@@ -24,9 +23,11 @@ services:
     depends_on:
       - redis
       - postgres
+      - api
     links:
       - redis
       - postgres
+      - api
   redis:
     image: redis:7.2.0
     restart: always
@@ -38,13 +39,22 @@ services:
     image: postgres:15
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - .env
     logging:
       options:
         max-size: 10m
         max-file: "3"
     volumes:
-      - ./.postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
       - ./sql/docker_init.sql:/docker-entrypoint-initdb.d/docker_init.sql
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    depends_on:
+      - worker
+    ports:
+      - "8090:9181"
+volumes:
+  postgres-data:

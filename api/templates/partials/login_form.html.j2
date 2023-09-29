@@ -1,0 +1,38 @@
+{% if invalid_login %}
+<div class="notification is-warning">
+    Invalid username or password
+</div>
+{% endif %}
+<form
+hx-post="/auth"
+hx-swap="innerHTML"
+hx-target="#login-form-parent"
+method="post">
+    <div class="field">
+        <label class="label" for="email">Email</label>
+        <div class="control">
+            <input id="email" type="email" name= "email" class="input validate" required/>
+        </div>
+        <span
+            class="helper-text"
+            data-error="Please enter a valid email."
+            data-success=""></span
+        >
+    </div>
+    <div class="field">
+        <label class="label" for="password">Password</label>
+        <div class="control">
+            <input id="password" name="password" type="password" class="input validate" required/>
+        </div>
+    </div>
+    <div class="field">
+        <div class="control">
+        <button class="button" type="submit" name="action">
+            <span class="icon">
+                <i data-feather="log-in"></i>
+            </span>
+            <span>Log In</span>
+          </button>
+        </div>
+    </div>
+</form>
