@@ -63,7 +63,7 @@ async def websocket_logs(websocket: WebSocket):
 
 @api.get("/", response_class=HTMLResponse)
 async def index(request: Request, user=Depends(auth_handler.auth_wrapper)):
-    context = {"title": "Home | Supercontinuum"}
+    context = {"title": "Home | Tendril"}
     return templates.TemplateResponse("index.html.j2",
                                       {"request": request,
                                        "context": context,
@@ -72,7 +72,7 @@ async def index(request: Request, user=Depends(auth_handler.auth_wrapper)):
 
 @api.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
-    context = {"title": "Login | Supercontinuum"}
+    context = {"title": "Login | Tendril"}
     return templates.TemplateResponse("login.html.j2",
                                       {"request": request,
                                        "context": context})

@@ -1,5 +1,11 @@
 @import "bulma.min.css";
 
+:root {
+    --t-brand-primary: #6680bb;
+    --t-brand-darker: #4f6391;
+    --t-brand-compl: #bb7666;
+}
+
 .hero.is-primary {
-    background: linear-gradient(to top right, #134c91 10%, #22c2d4);
+    background: linear-gradient(to top right, var(--t-brand-darker), var(--t-brand-primary));
 }
