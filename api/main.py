@@ -1,18 +1,20 @@
+import logging
 from pathlib import Path
 from fastapi import Depends, FastAPI, WebSocket, Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from security import AuthHander, RequiresLoginException
+from security import AuthHandler, RequiresLoginException
 import redis
 from rq import Queue
 from database import Postgres
 from websocket_manager import WebSocketManager
 from models import Run
 
+logger = logging.getLogger(__name__)
 api = FastAPI()
 pg = Postgres()
-auth_handler = AuthHander()
+auth_handler = AuthHandler()
 ws_manager = WebSocketManager()
 
 redis_connection = redis.Redis(host='redis', port=6379)
@@ -31,16 +33,19 @@ async def exception_handler(request: Request,
 
 @api.middleware("http")
 async def create_auth_header(request: Request, call_next):
+    logger.debug("Entered create_auth_header")
     if "Authorization" not in request.headers and "Authorization" in request.cookies:
         access_token = request.cookies["Authorization"]
 
         request.headers.__dict__["_list"].append(
             ("authorization".encode(), f"Bearer {access_token}".encode())
         )
+        logger.debug("Authorization cookie was present, but header was not")
     elif "Authorization" not in request.headers and "Authorization" not in request.cookies:
         request.headers.__dict__["_list"].append(
             ("authorization".encode(), "Bearer invalid".encode())
         )
+        logger.debug("Authorization cookie nor header were present")
 
     response = await call_next(request)
     return response
@@ -80,22 +85,23 @@ async def login(request: Request):
 
 @api.post("/auth")
 async def auth(request: Request,
-                response: Response,
-                email: str = Form(...), password: str = Form(...)):
+               response: Response,
+               email: str = Form(...), password: str = Form(...)):
+    if await auth_handler.authenticate_user(email, password):
+        token = auth_handler.create_access_token("test")
 
-    if email != "test@test.com":
-        return templates.TemplateResponse("partials/login_form.html.j2",
-                                          {"request": request,
-                                           "invalid_login": True})
+        # add cookie
+        response.set_cookie(key="Authorization",
+                            value=token,
+                            httponly=True,
+                            samesite="strict")
+        # redirect user to home
+        response.headers["HX-Redirect"] = api.url_path_for('index')
+        return {"success": "true"}
 
-    # add cookie
-    response.set_cookie(key="Authorization",
-                        value=f"token",
-                        httponly=True,
-                        samesite="strict")
-    # redirect user to home
-    response.headers["HX-Redirect"] = api.url_path_for('index')
-    return {"success": "true"}
+    return templates.TemplateResponse("partials/login_form.html.j2",
+                                      {"request": request,
+                                       "invalid_login": True})
 
 
 @api.get("/health")
