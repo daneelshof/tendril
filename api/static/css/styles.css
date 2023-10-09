@@ -9,3 +9,7 @@
 .hero.is-primary {
     background: linear-gradient(to top right, var(--t-brand-darker), var(--t-brand-primary));
 }
+
+.navbar {
+    background: linear-gradient(to top right, var(--t-brand-darker), var(--t-brand-primary));
+}
